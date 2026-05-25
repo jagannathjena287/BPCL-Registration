@@ -1,0 +1,2 @@
+/api/*  https://YOUR_RENDER_APP_URL/api/:splat  200
+/uploads/*  https://YOUR_RENDER_APP_URL/uploads/:splat  200

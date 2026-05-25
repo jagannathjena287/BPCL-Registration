@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPCL PNG - Admin Login</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Utility Bar (BPCL Corporate) -->
+    <div class="top-utility-bar">
+        <div class="top-utility-left">
+            <span class="top-utility-item"><i class="fa-solid fa-phone"></i> Helpline: 1906 / 1800-22-4344</span>
+            <span class="top-utility-item"><i class="fa-solid fa-envelope"></i> pngsupport@bpcl.in</span>
+        </div>
+        <div class="top-utility-right">
+            <span class="top-utility-item"><i class="fa-solid fa-circle-check"></i> Government of India Initiative</span>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+                <circle cx="80" cy="80" r="75" fill="#FFFFFF" stroke="#007BC9" stroke-width="4"/>
+                <path d="M 80 15 C 115 15 140 40 140 75 C 140 115 110 145 80 145 C 50 145 20 115 20 75 C 20 40 45 15 80 15 Z" fill="#007BC9"/>
+                <path d="M 80 30 C 95 50 110 70 100 100 C 90 120 70 120 60 100 C 50 70 65 50 80 30 Z" fill="#FDDA2A"/>
+                <path d="M 80 50 C 90 65 98 80 90 98 C 85 108 75 108 70 98 C 62 80 70 65 80 50 Z" fill="#1B3B64"/>
+                <path d="M 80 70 C 85 78 88 85 85 93 C 83 97 77 97 75 93 C 72 85 75 78 80 70 Z" fill="#EF4444"/>
+            </svg>
+            <div class="logo-text">
+                <h1>Bharat Petroleum</h1>
+                <p>Piped Natural Gas, Sambalpur</p>
+            </div>
+        </div>
+        <div class="nav-buttons">
+            <a href="/" class="btn btn-secondary">
+                <i class="fa-solid fa-file-pen"></i> Registration Form
+            </a>
+        </div>
+    </header>
+
+    <main class="container login-page">
+        <div class="glass-card login-container">
+            <div class="login-emblem">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+                    <circle cx="80" cy="80" r="75" fill="#FFFFFF" stroke="#007BC9" stroke-width="4"/>
+                    <path d="M 80 15 C 115 15 140 40 140 75 C 140 115 110 145 80 145 C 50 145 20 115 20 75 C 20 40 45 15 80 15 Z" fill="#007BC9"/>
+                    <path d="M 80 30 C 95 50 110 70 100 100 C 90 120 70 120 60 100 C 50 70 65 50 80 30 Z" fill="#FDDA2A"/>
+                    <path d="M 80 50 C 90 65 98 80 90 98 C 85 108 75 108 70 98 C 62 80 70 65 80 50 Z" fill="#1B3B64"/>
+                    <path d="M 80 70 C 85 78 88 85 85 93 C 83 97 77 97 75 93 C 72 85 75 78 80 70 Z" fill="#EF4444"/>
+                </svg>
+            </div>
+            
+            <div class="login-title">
+                <span><i class="fa-solid fa-lock"></i> Admin Portal Login</span>
+                <p>Restricted access for authorized BPCL PNG Sambalpur operators.</p>
+            </div>
+
+            <form id="loginForm" class="form-grid">
+                <div class="form-group col-12">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter username" required>
+                </div>
+                
+                <div class="form-group col-12">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${isError ? 'toast-error' : 'toast-success'}`;
+            toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-xmark' : 'fa-circle-check'}"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 50);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Login successful! Redirecting...', false);
+                    setTimeout(() => {
+                        window.location.href = '/admin';
+                    }, 1000);
+                } else {
+                    showToast(result.message || 'Invalid credentials', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error, please try again.', true);
+            }
+        });
+    </script>
+</body>
+</html>

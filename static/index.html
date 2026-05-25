@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPCL PNG Sambalpur - Consumer Registration Portal</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Top Utility Bar (BPCL Corporate) -->
+    <div class="top-utility-bar">
+        <div class="top-utility-left">
+            <span class="top-utility-item"><i class="fa-solid fa-phone"></i> Helpline: 1906 / 1800-22-4344</span>
+            <span class="top-utility-item"><i class="fa-solid fa-envelope"></i> pngsupport@bpcl.in</span>
+        </div>
+        <div class="top-utility-right">
+            <span class="top-utility-item"><i class="fa-solid fa-circle-check"></i> Government of India Initiative</span>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+                <circle cx="80" cy="80" r="75" fill="#FFFFFF" stroke="#007BC9" stroke-width="4"/>
+                <path d="M 80 15 C 115 15 140 40 140 75 C 140 115 110 145 80 145 C 50 145 20 115 20 75 C 20 40 45 15 80 15 Z" fill="#007BC9"/>
+                <path d="M 80 30 C 95 50 110 70 100 100 C 90 120 70 120 60 100 C 50 70 65 50 80 30 Z" fill="#FDDA2A"/>
+                <path d="M 80 50 C 90 65 98 80 90 98 C 85 108 75 108 70 98 C 62 80 70 65 80 50 Z" fill="#1B3B64"/>
+                <path d="M 80 70 C 85 78 88 85 85 93 C 83 97 77 97 75 93 C 72 85 75 78 80 70 Z" fill="#EF4444"/>
+            </svg>
+            <div class="logo-text">
+                <h1>Bharat Petroleum</h1>
+                <p>Bharat Gas PNG - Sambalpur</p>
+            </div>
+        </div>
+        <div class="nav-buttons">
+            <a href="/admin" class="btn btn-secondary">
+                <i class="fa-solid fa-user-tie"></i> Admin Dashboard
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Official Service Banner -->
+        <section class="service-banner" aria-labelledby="serviceBannerTitle">
+            <div class="service-banner-main">
+                <span class="service-kicker">Official registration service</span>
+                <h2 id="serviceBannerTitle">Domestic PNG Registration - Sambalpur City</h2>
+                <p>For authorized enrollment of domestic PNG consumers, document verification, and connection processing under BPCL Bharat Gas PNG.</p>
+            </div>
+            <div class="service-banner-side">
+                <div class="service-contact">
+                    <i class="fa-solid fa-headset"></i>
+                    <div>
+                        <span>Consumer helpline</span>
+                        <strong>1906 / 1800-22-4344</strong>
+                    </div>
+                </div>
+                <div class="process-strip" aria-label="Registration process">
+                    <span><i class="fa-solid fa-file-pen"></i> Apply</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                    <span><i class="fa-solid fa-shield-halved"></i> Verify</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                    <span><i class="fa-solid fa-gauge-high"></i> Connect</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="glass-card">
+            <div class="card-title">
+                <i class="fa-solid fa-file-signature"></i>
+                <div>
+                    <span>PNG Domestic Consumer Registration Form</span>
+                    <small>Complete each section using details verified from customer documents.</small>
+                </div>
+            </div>
+
+            <!-- Multi-step Form Progress -->
+            <div class="progress-container">
+                <div class="progress-line" id="progressLine"></div>
+                <div class="progress-step active" data-step="1">
+                    1
+                    <span class="step-label">Personal Info</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    2
+                    <span class="step-label">Address</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    3
+                    <span class="step-label">Aadhaar & PAN</span>
+                </div>
+                <div class="progress-step" data-step="4">
+                    4
+                    <span class="step-label">LPG Details</span>
+                </div>
+                <div class="progress-step" data-step="5">
+                    5
+                    <span class="step-label">Payment & Meter</span>
+                </div>
+            </div>
+
+            <!-- Form Start -->
+            <form id="registrationForm" enctype="multipart/form-data">
+                
+                <!-- STEP 1: Personal Info -->
+                <div class="form-step active" data-step="1">
+                    <div class="form-grid">
+                        <div class="form-group col-4">
+                            <label for="application_form_no">Application Form No.<span class="required">*</span></label>
+                            <input type="text" id="application_form_no" name="application_form_no" class="form-control" placeholder="e.g. 10-4609-36-RSIS-10" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="scheme_code">Scheme Code</label>
+                            <input type="text" id="scheme_code" name="scheme_code" class="form-control" value="PNG-DOM-08">
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="customer_group">Customer Group</label>
+                            <input type="text" id="customer_group" name="customer_group" class="form-control" value="01 - DOMESTIC" readonly>
+                        </div>
+
+                        <div class="form-group col-2">
+                            <label for="contact_title">Title<span class="required">*</span></label>
+                            <select id="contact_title" name="contact_title" class="form-control" required>
+                                <option value="Mr">Mr.</option>
+                                <option value="Mrs">Mrs.</option>
+                                <option value="Ms">Ms.</option>
+                                <option value="Dr">Dr.</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="first_name">First Name<span class="required">*</span></label>
+                            <input type="text" id="first_name" name="first_name" class="form-control" required>
+                        </div>
+                        <div class="form-group col-3">
+                            <label for="middle_name">Middle Name</label>
+                            <input type="text" id="middle_name" name="middle_name" class="form-control">
+                        </div>
+                        <div class="form-group col-3">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" class="form-control">
+                        </div>
+
+                        <div class="form-group col-4">
+                            <label for="father_name">Father's / Husband's Name<span class="required">*</span></label>
+                            <input type="text" id="father_name" name="father_name" class="form-control" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="date_of_birth">Date of Birth<span class="required">*</span></label>
+                            <input type="date" id="date_of_birth" name="date_of_birth" class="form-control" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="gender">Gender<span class="required">*</span></label>
+                            <select id="gender" name="gender" class="form-control" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-6">
+                            <label for="mobile_phone">Mobile Number<span class="required">*</span></label>
+                            <input type="tel" id="mobile_phone" name="mobile_phone" class="form-control" placeholder="10-digit mobile number" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="name@domain.com">
+                        </div>
+                        
+                        <div class="form-group col-4">
+                            <label for="profession">Profession</label>
+                            <input type="text" id="profession" name="profession" class="form-control" placeholder="e.g. Service, Business">
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="designation">Designation</label>
+                            <input type="text" id="designation" name="designation" class="form-control">
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="tel1">Alternate Phone (Tel 1)</label>
+                            <input type="text" id="tel1" name="tel1" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Address & Property Details -->
+                <div class="form-step" data-step="2">
+                    <div class="form-grid">
+                        <div class="form-group col-4">
+                            <label for="house_no">House / Flat / Plot No.<span class="required">*</span></label>
+                            <input type="text" id="house_no" name="house_no" class="form-control" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="street_no">Street / Building / Society Name<span class="required">*</span></label>
+                            <input type="text" id="street_no" name="street_no" class="form-control" required>
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="locality">Locality / Area / Ward No.<span class="required">*</span></label>
+                            <input type="text" id="locality" name="locality" class="form-control" placeholder="e.g. Danipali, Bhalupali" required>
+                        </div>
+
+                        <div class="form-group col-6">
+                            <label for="landmark">Landmark / Near By</label>
+                            <input type="text" id="landmark" name="landmark" class="form-control">
+                        </div>
+                        <div class="form-group col-3">
+                            <label for="postal_code">Postal Code (Pin Code)<span class="required">*</span></label>
+                            <input type="text" id="postal_code" name="postal_code" class="form-control" value="768004" required>
+                        </div>
+                        <div class="form-group col-3">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" class="form-control" value="Sambalpur" readonly>
+                        </div>
+
+                        <div class="form-group col-6">
+                            <label for="type_of_property">Type of Property<span class="required">*</span></label>
+                            <select id="type_of_property" name="type_of_property" class="form-control" required>
+                                <option value="ROW HOUSE">ROW HOUSE</option>
+                                <option value="APARTMENT">APARTMENT</option>
+                                <option value="BUNGALOW">BUNGALOW</option>
+                                <option value="OTHER">OTHER</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="type_of_ownership">Type of Ownership<span class="required">*</span></label>
+                            <select id="type_of_ownership" name="type_of_ownership" class="form-control" required>
+                                <option value="SELF OWNED">SELF OWNED</option>
+                                <option value="RENTED">RENTED</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group col-6">
+                            <label for="geographical_area">Geographical Area</label>
+                            <input type="text" id="geographical_area" name="geographical_area" class="form-control" value="CGD - Sambalpur" readonly>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="charge_area">Charge Area</label>
+                            <input type="text" id="charge_area" name="charge_area" class="form-control" value="Sambalpur" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Identity & Document Proofs -->
+                <div class="form-step" data-step="3">
+                    <div class="form-grid">
+                        <div class="form-group col-6">
+                            <label for="aadhaar_num">Aadhaar Card Number (12 Digits)<span class="required">*</span></label>
+                            <input type="text" id="aadhaar_num" name="aadhaar_num" class="form-control" placeholder="12-digit Aadhaar" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="aadhar_name">Name on Aadhaar Card<span class="required">*</span></label>
+                            <input type="text" id="aadhar_name" name="aadhar_name" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group col-6">
+                            <label for="pan">PAN Card Number (10 Characters)</label>
+                            <input type="text" id="pan" name="pan" class="form-control" placeholder="e.g. ABCDE1234F">
+                        </div>
+                        <div class="form-group col-6">
+                            <!-- Empty Column -->
+                        </div>
+
+                        <!-- Document Uploads -->
+                        <div class="form-group col-4">
+                            <label>Upload Aadhaar Proof<span class="required">*</span></label>
+                            <div class="file-upload-wrapper">
+                                <i class="fa-solid fa-address-card file-upload-icon"></i>
+                                <div class="file-upload-text">Aadhaar proof</div>
+                                <div class="file-upload-hint">PDF, PNG, JPG, or JPEG</div>
+                                <div class="file-name-preview" id="aadhaarPreview">No file chosen</div>
+                                <input type="file" id="aadhaar_file" name="aadhaar_file" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group col-4">
+                            <label>Upload PAN Proof</label>
+                            <div class="file-upload-wrapper">
+                                <i class="fa-solid fa-id-card file-upload-icon"></i>
+                                <div class="file-upload-text">PAN proof</div>
+                                <div class="file-upload-hint">PDF, PNG, JPG, or JPEG</div>
+                                <div class="file-name-preview" id="panPreview">No file chosen</div>
+                                <input type="file" id="pan_file" name="pan_file">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group col-4">
+                            <label>Upload Address Proof<span class="required">*</span></label>
+                            <div class="file-upload-wrapper">
+                                <i class="fa-solid fa-house-chimney file-upload-icon"></i>
+                                <div class="file-upload-text">Address proof</div>
+                                <div class="file-upload-hint">Electricity bill, ration card, or approved document</div>
+                                <div class="file-name-preview" id="addressPreview">No file chosen</div>
+                                <input type="file" id="address_file" name="address_file" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: LPG Connection Details -->
+                <div class="form-step" data-step="4">
+                    <div class="notice-panel">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span><strong>LPG Surrender Policy:</strong> According to Ministry rules, the consumer agrees to surrender their LPG connection within 60 days of Piped Natural Gas activation.</span>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group col-4">
+                            <label for="has_lpg">Has Existing LPG Connection?</label>
+                            <select id="has_lpg" class="form-control">
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-8">
+                            <!-- spacer -->
+                        </div>
+
+                        <div class="form-group col-4 lpg-field">
+                            <label for="omc_name">LPG OMC Name</label>
+                            <select id="omc_name" name="omc_name" class="form-control">
+                                <option value="">Select OMC</option>
+                                <option value="BPCL (Bharat Gas)">BPCL (Bharat Gas)</option>
+                                <option value="IOCL (Indane)">IOCL (Indane)</option>
+                                <option value="HPCL (HP Gas)">HPCL (HP Gas)</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-4 lpg-field">
+                            <label for="customer_no">LPG Customer No</label>
+                            <input type="text" id="customer_no" name="customer_no" class="form-control">
+                        </div>
+                        <div class="form-group col-4 lpg-field">
+                            <label for="distributor_name">LPG Distributor Name</label>
+                            <input type="text" id="distributor_name" name="distributor_name" class="form-control">
+                        </div>
+                        
+                        <div class="form-group col-4 lpg-field">
+                            <label>Upload LPG Copy (Book/Receipt)</label>
+                            <div class="file-upload-wrapper">
+                                <i class="fa-solid fa-book-open file-upload-icon"></i>
+                                <div class="file-upload-text">LPG booklet or receipt</div>
+                                <div class="file-upload-hint">PDF, PNG, JPG, or JPEG</div>
+                                <div class="file-name-preview" id="lpgPreview">No file chosen</div>
+                                <input type="file" id="lpg_file" name="lpg_file">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5: Payment & Meter Details -->
+                <div class="form-step" data-step="5">
+                    <div class="form-grid">
+                        <div class="form-group col-4">
+                            <label for="cheque_no">Cheque / DD Number</label>
+                            <input type="text" id="cheque_no" name="cheque_no" class="form-control" placeholder="6-digit cheque number">
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="cheque_date">Cheque Date</label>
+                            <input type="date" id="cheque_date" name="cheque_date" class="form-control">
+                        </div>
+                        <div class="form-group col-4">
+                            <label for="cheque_amount">Cheque Amount (Rs.)</label>
+                            <input type="number" id="cheque_amount" name="cheque_amount" class="form-control" value="0">
+                        </div>
+
+                        <div class="form-group col-6">
+                            <label for="bank_name">Drawn on (Bank Name)</label>
+                            <input type="text" id="bank_name" name="bank_name" class="form-control" placeholder="e.g. State Bank of India">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="cheque_received_date">Cheque Received Date</label>
+                            <input type="date" id="cheque_received_date" name="cheque_received_date" class="form-control">
+                        </div>
+
+                        <div class="form-group col-6">
+                            <label for="meter_no">Meter Number (If already installed)</label>
+                            <input type="text" id="meter_no" name="meter_no" class="form-control" placeholder="e.g. RR2301064789">
+                        </div>
+                        <div class="form-group col-6">
+                            <!-- empty spacer -->
+                        </div>
+
+                        <div class="form-group col-4">
+                            <label>Upload Cheque Copy</label>
+                            <div class="file-upload-wrapper">
+                                <i class="fa-solid fa-money-check-dollar file-upload-icon"></i>
+                                <div class="file-upload-text">Cheque or DD copy</div>
+                                <div class="file-upload-hint">PDF, PNG, JPG, or JPEG</div>
+                                <div class="file-name-preview" id="chequePreview">No file chosen</div>
+                                <input type="file" id="cheque_file" name="cheque_file">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Navigation Actions -->
+                <div class="form-actions">
+                    <button type="button" id="prevBtn" class="btn btn-secondary" style="visibility: hidden;">
+                        <i class="fa-solid fa-chevron-left"></i> Previous
+                    </button>
+                    <button type="button" id="nextBtn" class="btn btn-primary">
+                        Next <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="static/js/app.js"></script>
+</body>
+</html>
