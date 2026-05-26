@@ -1,19 +1,59 @@
+import os
+import psycopg2
+import psycopg2.extras
 import sqlite3
-from config import DATABASE_PATH
+import config
 
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if config.DATABASE_URL:
+        conn = psycopg2.connect(config.DATABASE_URL)
+        return conn
+    else:
+        conn = sqlite3.connect(config.DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+def get_db_cursor(conn):
+    if hasattr(conn, 'row_factory'):
+        # SQLite
+        return conn.cursor()
+    else:
+        # PostgreSQL
+        return conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+def execute_query(cursor, query, params=None):
+    """
+    Executes a query by automatically converting placeholders between SQLite (?) and PostgreSQL (%s)
+    depending on the active database driver.
+    """
+    if params is None:
+        params = ()
+    
+    # Check if the cursor is SQLite
+    is_sqlite = 'sqlite3' in type(cursor).__module__
+    
+    if is_sqlite:
+        # Translate %s to ?
+        query = query.replace('%s', '?')
+    else:
+        # Translate ? to %s
+        query = query.replace('?', '%s')
+        
+    cursor.execute(query, params)
+    return cursor
 
 def init_db():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = get_db_cursor(conn)
+    
+    is_sqlite = hasattr(conn, 'row_factory')
+    
+    id_type = "INTEGER PRIMARY KEY AUTOINCREMENT" if is_sqlite else "SERIAL PRIMARY KEY"
     
     # Create consumers table
-    cursor.execute('''
+    query = f'''
     CREATE TABLE IF NOT EXISTS consumers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id {id_type},
         name TEXT,
         customer_group TEXT DEFAULT '01 - DOMESTIC',
         tel1 TEXT,
@@ -64,7 +104,7 @@ def init_db():
         bank_name TEXT,
         meter_no TEXT,
         
-        -- Document file paths
+        -- Document file paths (local path or Supabase URL)
         aadhaar_file TEXT,
         pan_file TEXT,
         address_file TEXT,
@@ -73,7 +113,8 @@ def init_db():
         
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-    ''')
+    '''
+    cursor.execute(query)
     conn.commit()
     conn.close()
     print("Database initialized successfully.")

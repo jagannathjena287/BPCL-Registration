@@ -2,7 +2,7 @@ import openpyxl
 import os
 import shutil
 import sqlite3
-from database import get_db_connection
+from database import get_db_connection, get_db_cursor, execute_query
 from config import BASE_DIR
 
 TEMPLATE_FILE = os.path.join(BASE_DIR, 'Copy of BP Utility Template 64 Bit.xlsx')
@@ -28,18 +28,18 @@ def export_to_excel(output_filepath, consumer_ids=None):
     # Let's ensure Column AX (index 50) has 'Meter No.' header
     ws.cell(row=1, column=50, value="Meter No.")
     
-    # Fetch data from SQLite database
+    # Fetch data from database
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = get_db_cursor(conn)
     
     if consumer_ids:
         # Export only selected consumer IDs
         placeholders = ','.join('?' for _ in consumer_ids)
         query = f"SELECT * FROM consumers WHERE id IN ({placeholders}) ORDER BY id ASC"
-        cursor.execute(query, consumer_ids)
+        execute_query(cursor, query, consumer_ids)
     else:
         # Export all consumers
-        cursor.execute("SELECT * FROM consumers ORDER BY id ASC")
+        execute_query(cursor, "SELECT * FROM consumers ORDER BY id ASC")
         
     rows = cursor.fetchall()
     conn.close()

@@ -1,11 +1,16 @@
 import os
 from flask import Flask, request, jsonify, send_from_directory, session, redirect, url_for, send_file
-import sqlite3
 from werkzeug.utils import secure_filename
 import config
-from database import get_db_connection
+from database import get_db_connection, get_db_cursor, execute_query
 from excel_export import export_to_excel
 from datetime import datetime
+from supabase import create_client, Client
+
+# Initialize Supabase Client if credentials are provided
+supabase_client = None
+if config.SUPABASE_URL and config.SUPABASE_KEY:
+    supabase_client = create_client(config.SUPABASE_URL, config.SUPABASE_KEY)
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -24,12 +29,34 @@ def save_uploaded_file(file, doc_type, form_no):
         # Clean form_no for filename safety
         safe_form_no = "".join(c for c in form_no if c.isalnum() or c in ('-', '_'))
         filename = f"{safe_form_no}_{doc_type}.{ext}"
-        dest_dir = os.path.join(config.UPLOAD_DIR, doc_type)
-        os.makedirs(dest_dir, exist_ok=True)
-        filepath = os.path.join(dest_dir, filename)
-        file.save(filepath)
-        # return relative path to serve it via uploads route
-        return f"{doc_type}/{filename}"
+        path_in_bucket = f"{doc_type}/{filename}"
+        
+        if supabase_client:
+            try:
+                # Read file bytes
+                file_data = file.read()
+                # Determine content type
+                content_type = "application/pdf" if ext == "pdf" else f"image/{ext}"
+                if ext == "jpg": content_type = "image/jpeg"
+                
+                # Upload to Supabase Bucket "bpcl-uploads"
+                supabase_client.storage.from_("bpcl-uploads").upload(
+                    path=path_in_bucket,
+                    file=file_data,
+                    file_options={"content-type": content_type, "upsert": "true"}
+                )
+                return path_in_bucket
+            except Exception as e:
+                print(f"Error uploading file to Supabase: {e}")
+                return None
+        else:
+            # Fallback local save
+            dest_dir = os.path.join(config.UPLOAD_DIR, doc_type)
+            os.makedirs(dest_dir, exist_ok=True)
+            filepath = os.path.join(dest_dir, filename)
+            file.save(filepath)
+            # return relative path to serve it via uploads route
+            return f"{doc_type}/{filename}"
     return None
 
 # Serve Frontend Pages
@@ -78,7 +105,21 @@ def api_auth_check():
 def serve_upload(filename):
     if 'logged_in' not in session:
         return jsonify({'error': 'Unauthorized'}), 403
-    return send_from_directory(config.UPLOAD_DIR, filename)
+        
+    if supabase_client:
+        try:
+            # Generate a signed URL valid for 15 minutes (900 seconds)
+            res = supabase_client.storage.from_("bpcl-uploads").create_signed_url(path=filename, expires_in=900)
+            signed_url = res.get('signedURL') or res.get('signed_url')
+            if signed_url:
+                return redirect(signed_url)
+            else:
+                return jsonify({'error': 'Failed to generate access URL'}), 500
+        except Exception as e:
+            return jsonify({'error': f'Storage error: {str(e)}'}), 500
+    else:
+        # Fallback local serve
+        return send_from_directory(config.UPLOAD_DIR, filename)
 
 # API Dashboard stats
 @app.route('/api/dashboard', methods=['GET'])
@@ -87,26 +128,26 @@ def api_dashboard():
         return jsonify({'error': 'Unauthorized'}), 403
         
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = get_db_cursor(conn)
     
     # Get total count
-    cursor.execute("SELECT COUNT(*) as total FROM consumers")
+    execute_query(cursor, "SELECT COUNT(*) as total FROM consumers")
     total = cursor.fetchone()['total']
     
     # Get total with Meter No
-    cursor.execute("SELECT COUNT(*) as metered FROM consumers WHERE meter_no IS NOT NULL AND meter_no != ''")
+    execute_query(cursor, "SELECT COUNT(*) as metered FROM consumers WHERE meter_no IS NOT NULL AND meter_no != ''")
     metered = cursor.fetchone()['metered']
     
     # Get property type distribution
-    cursor.execute("SELECT type_of_property, COUNT(*) as count FROM consumers GROUP BY type_of_property")
+    execute_query(cursor, "SELECT type_of_property, COUNT(*) as count FROM consumers GROUP BY type_of_property")
     property_types = {r['type_of_property']: r['count'] for r in cursor.fetchall() if r['type_of_property']}
     
     # Get ownership type distribution
-    cursor.execute("SELECT type_of_ownership, COUNT(*) as count FROM consumers GROUP BY type_of_ownership")
+    execute_query(cursor, "SELECT type_of_ownership, COUNT(*) as count FROM consumers GROUP BY type_of_ownership")
     ownership_types = {r['type_of_ownership']: r['count'] for r in cursor.fetchall() if r['type_of_ownership']}
     
     # Get recent 5 registrations
-    cursor.execute("SELECT id, name, application_form_no, mobile_phone, created_at, meter_no FROM consumers ORDER BY id DESC LIMIT 5")
+    execute_query(cursor, "SELECT id, name, application_form_no, mobile_phone, created_at, meter_no FROM consumers ORDER BY id DESC LIMIT 5")
     recent = [dict(r) for r in cursor.fetchall()]
     
     conn.close()
@@ -132,8 +173,8 @@ def api_register():
         return jsonify({'success': False, 'message': 'Application Form Number is required.'}), 400
         
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id FROM consumers WHERE application_form_no = ?", (app_form_no,))
+    cursor = get_db_cursor(conn)
+    execute_query(cursor, "SELECT id FROM consumers WHERE application_form_no = ?", (app_form_no,))
     if cursor.fetchone():
         conn.close()
         return jsonify({'success': False, 'message': f'Application Form Number {app_form_no} already exists.'}), 400
@@ -250,9 +291,16 @@ def api_register():
     values = [db_fields[k] for k in keys]
     
     try:
-        cursor.execute(query, values)
-        conn.commit()
-        consumer_id = cursor.lastrowid
+        is_sqlite = hasattr(conn, 'row_factory')
+        if is_sqlite:
+            execute_query(cursor, query, values)
+            conn.commit()
+            consumer_id = cursor.lastrowid
+        else:
+            query_with_returning = query + " RETURNING id"
+            execute_query(cursor, query_with_returning, values)
+            consumer_id = cursor.fetchone()[0]
+            conn.commit()
         conn.close()
         return jsonify({
             'success': True,
@@ -273,7 +321,7 @@ def get_consumers():
     status_filter = request.args.get('status', 'all') # 'all', 'metered', 'unmetered'
     
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = get_db_cursor(conn)
     
     query = "SELECT * FROM consumers WHERE 1=1"
     params = []
@@ -290,7 +338,7 @@ def get_consumers():
         
     query += " ORDER BY id DESC"
     
-    cursor.execute(query, params)
+    execute_query(cursor, query, params)
     rows = cursor.fetchall()
     conn.close()
     
@@ -303,8 +351,8 @@ def get_consumer_by_id(consumer_id):
         return jsonify({'error': 'Unauthorized'}), 403
         
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM consumers WHERE id = ?", (consumer_id,))
+    cursor = get_db_cursor(conn)
+    execute_query(cursor, "SELECT * FROM consumers WHERE id = ?", (consumer_id,))
     row = cursor.fetchone()
     conn.close()
     
@@ -326,16 +374,16 @@ def update_consumer(consumer_id):
     scheme_code = data.get('scheme_code', '').strip()
     
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = get_db_cursor(conn)
     
     # Check if consumer exists
-    cursor.execute("SELECT id FROM consumers WHERE id = ?", (consumer_id,))
+    execute_query(cursor, "SELECT id FROM consumers WHERE id = ?", (consumer_id,))
     if not cursor.fetchone():
         conn.close()
         return jsonify({'error': 'Consumer not found'}), 404
         
     # Update fields
-    cursor.execute('''
+    execute_query(cursor, '''
         UPDATE consumers 
         SET meter_no = ?, locality = ?, mobile_phone = ?, email = ?, scheme_code = ?
         WHERE id = ?
