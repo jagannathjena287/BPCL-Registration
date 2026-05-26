@@ -2,6 +2,11 @@
   publish = "static"
 
 [[redirects]]
+  from = "/static/*"
+  to = "/:splat"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "https://bpcl-registration.onrender.com/api/:splat"
   status = 200
